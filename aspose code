@@ -1,0 +1,54 @@
+  if (Tocposition == "Page 1")
+                            {
+                                CheckHeading = true;
+                                Paragraph pr = new Paragraph(doc);
+                                doc.Sections[0].Body.PrependChild(pr);
+                             
+                                builder.MoveTo(pr);
+                            }
+                              else
+                            {
+                                foreach (Paragraph pr1 in paragraphs)
+                                {
+                                    if (pr1.ParagraphFormat.StyleIdentifier == StyleIdentifier.Heading1 || pr1.ParagraphFormat.StyleName.ToUpper() == "HEADING 1 UNNUMBERED" || pr1.ParagraphFormat.StyleName.ToUpper() == "HEADING 1 NOTOC")
+                                    {
+                                        CheckHeading = true;
+                                        if (pr1.PreviousSibling == null)
+                                        {
+                                            Paragraph pr = new Paragraph(doc);
+                                            pr1.ParentSection.Body.PrependChild(pr);
+                                            builder.MoveTo(pr);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            if (pr1.PreviousSibling.NodeType == NodeType.Table)
+                                            {
+                                                Table table = (Table)pr1.PreviousSibling;
+                                                if (table.NextSibling.ToString(SaveFormat.Text).Trim() != null && table.NextSibling.ToString(SaveFormat.Text).Trim() != "")
+                                                {
+                                                    Paragraph par = new Paragraph(doc);
+                                                    table.ParentNode.InsertAfter(par, table);
+                                                    builder.MoveTo(par);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                heading = pr1.PreviousSibling;
+                                                Paragraph par = new Paragraph(doc);
+                                                pr1.ParentNode.InsertBefore(par, pr1);
+                                                builder.MoveTo(par);
+                                            }
+                                            builder.InsertBreak(BreakType.SectionBreakNewPage);
+                                            break;  
+                                        }
+                                    }
+                                }
+                            }
+                            if (CheckHeading == false)
+                            {
+                                Paragraph pr = new Paragraph(doc);
+                                doc.Sections[0].Body.PrependChild(pr);
+                                builder.MoveTo(pr);
+                            }
+                        }
